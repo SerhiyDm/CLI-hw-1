@@ -4,46 +4,32 @@ const file = require("fs").promises;
 const contactsPath = path.resolve("db/contacts.json");
 
 async function listContacts() {
-  try {
-    let data = await file.readFile(contactsPath, "utf-8");
-    data = JSON.parse(data);
-    return data;
-  } catch (e) {
-    console.log(e);
-  }
+  let data = await file.readFile(contactsPath, "utf-8");
+  data = JSON.parse(data);
+  return data;
 }
 
 async function getContactById(contactId) {
-  try {
-    let data = await listContacts();
-    data = data.find((el) => el.id === contactId.toString());
-    return data;
-  } catch (e) {
-    console.log(e);
-  }
+  let data = await listContacts();
+  data = data.find((el) => el.id === contactId.toString());
+  return data ? data : false;
 }
 async function removeContact(contactId) {
-  try {
-    let data = await listContacts();
-    data = data.filter((el) => el.id !== contactId.toString());
-    await file.writeFile(contactsPath, JSON.stringify(data));
-    return "Сontact deleted successfully!";
-  } catch (e) {
-    console.log(e);
+  let data = await listContacts();
+  if (!data.find((el) => el.id === contactId.toString())) {
+    return false;
   }
+  data = data.filter((el) => el.id !== contactId.toString());
+  await file.writeFile(contactsPath, JSON.stringify(data));
+  return "Сontact deleted successfully!";
 }
 
 async function addContact(name, email, phone) {
-  try {
-    const contact = { name, email, phone, id: uuidv4() };
-    let data = await file.readFile(contactsPath, "utf-8");
-    data = JSON.parse(data);
-    data.unshift(contact);
-    await file.writeFile(contactsPath, JSON.stringify(data));
-    return contact;
-  } catch (e) {
-    console.log(e);
-  }
+  const contact = { name, email, phone, id: uuidv4() };
+  let data = await listContacts();
+  data.unshift(contact);
+  await file.writeFile(contactsPath, JSON.stringify(data));
+  return contact;
 }
 
 module.exports = {
